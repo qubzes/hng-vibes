@@ -8,14 +8,15 @@ interface TrackListProps {
   playingTrackId: string | null
   onPlay: (track: Track) => void
   onShowDetails: (track: Track) => void
+  onClearFilters: () => void
 }
 
-export function TrackList({ tracks, playingTrackId, onPlay, onShowDetails }: TrackListProps) {
+export function TrackList({ tracks, playingTrackId, onPlay, onShowDetails, onClearFilters }: TrackListProps) {
   if (tracks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
         <p className="text-sm text-muted-foreground">No tracks match your current search/filters.</p>
-        <button className="text-xs text-accent hover:underline">Clear filters</button>
+        <button onClick={onClearFilters} className="text-xs text-accent hover:underline">Clear filters</button>
       </div>
     )
   }

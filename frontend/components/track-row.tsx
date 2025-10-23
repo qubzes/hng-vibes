@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import type { Track } from "@/lib/mock-data"
-import { cn } from "@/lib/utils"
+import { cn, formatDuration, formatAddedTime } from "@/lib/utils"
 
 interface TrackRowProps {
   track: Track
@@ -25,22 +25,8 @@ export function TrackRow({ track, isPlaying, onPlay, onShowDetails }: TrackRowPr
     })
   }
 
-  const formatDuration = (ms: number) => {
-    const minutes = Math.floor(ms / 60000)
-    const seconds = ((ms % 60000) / 1000).toFixed(0)
-    return `${minutes}:${Number.parseInt(seconds) < 10 ? "0" : ""}${seconds}`
-  }
-
-  const formatAddedTime = (date: Date) => {
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-    if (hours < 1) return "Just now"
-    if (hours < 24) return `${hours}h ago`
-    if (days < 7) return `${days}d ago`
-    return date.toLocaleDateString()
+  const handleOpenSpotify = () => {
+    window.open(track.spotify_url, "_blank")
   }
 
   return (
@@ -55,7 +41,7 @@ export function TrackRow({ track, isPlaying, onPlay, onShowDetails }: TrackRowPr
       {isPlaying && <div className="absolute left-0 top-0 h-full w-1.5 bg-accent" />}
 
       {/* Album Art */}
-      <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md bg-card transition-transform duration-200 group-hover:scale-105">
+      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-card transition-transform duration-200 group-hover:scale-105">
         <img src={track.cover_url || "/placeholder.svg"} alt={track.album} className="h-full w-full object-cover" />
       </div>
 
@@ -84,7 +70,7 @@ export function TrackRow({ track, isPlaying, onPlay, onShowDetails }: TrackRowPr
       </div>
 
       {/* Reactions */}
-      <div className="hidden flex-shrink-0 gap-3 text-xs text-muted-foreground sm:flex">
+      <div className="hidden shrink-0 gap-3 text-xs text-muted-foreground sm:flex">
         <div className="flex items-center gap-1" title="React on Slack">
           <span>👍</span>
           <span>{track.reactions.like}</span>
@@ -100,7 +86,7 @@ export function TrackRow({ track, isPlaying, onPlay, onShowDetails }: TrackRowPr
       </div>
 
       {/* Duration */}
-      <div className="hidden flex-shrink-0 text-xs text-muted-foreground sm:block">
+      <div className="hidden shrink-0 text-xs text-muted-foreground sm:block">
         {formatDuration(track.duration_ms)}
       </div>
 
@@ -119,7 +105,7 @@ export function TrackRow({ track, isPlaying, onPlay, onShowDetails }: TrackRowPr
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => onShowDetails(track)}>View Details</DropdownMenuItem>
           <DropdownMenuItem onClick={handleCopyLink}>Copy Track Link</DropdownMenuItem>
-          <DropdownMenuItem>Open in Spotify</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOpenSpotify}>Open in Spotify</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

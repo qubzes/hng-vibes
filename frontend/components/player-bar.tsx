@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Play, Pause, SkipBack, SkipForward, Volume2, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import type { Track } from "@/lib/mock-data"
+import { formatTime } from "@/lib/utils"
 
 interface PlayerBarProps {
   track: Track | null
@@ -16,6 +17,7 @@ interface PlayerBarProps {
   currentTime: number
   duration: number
   onSeek: (time: number) => void
+  audioRef?: React.RefObject<HTMLAudioElement | null>
 }
 
 export function PlayerBar({
@@ -28,17 +30,18 @@ export function PlayerBar({
   currentTime,
   duration,
   onSeek,
+  audioRef,
 }: PlayerBarProps) {
   const [volume, setVolume] = useState(70)
 
-  if (!track) return null
+  // Connect volume state to audio element
+  useEffect(() => {
+    if (audioRef?.current) {
+      audioRef.current.volume = volume / 100
+    }
+  }, [volume, audioRef])
 
-  const formatTime = (ms: number) => {
-    const totalSeconds = Math.floor(ms / 1000)
-    const minutes = Math.floor(totalSeconds / 60)
-    const seconds = totalSeconds % 60
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`
-  }
+  if (!track) return null
 
   return (
     <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-md">
@@ -65,7 +68,7 @@ export function PlayerBar({
           </div>
 
           {/* Center: Transport Controls */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <Button variant="ghost" size="sm" onClick={onPrev} className="h-8 w-8 p-0">
               <SkipBack className="h-4 w-4" />
             </Button>
@@ -83,7 +86,7 @@ export function PlayerBar({
           </div>
 
           {/* Right: Volume & Expand */}
-          <div className="hidden flex-shrink-0 items-center gap-2 sm:flex">
+          <div className="hidden shrink-0 items-center gap-2 sm:flex">
             <Volume2 className="h-4 w-4 text-muted-foreground" />
             <Slider value={[volume]} max={100} step={1} onValueChange={(v) => setVolume(v[0])} className="w-20" />
             <Button variant="ghost" size="sm" onClick={onExpand} className="h-8 w-8 p-0">

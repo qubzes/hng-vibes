@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
-import { cn } from "@/lib/utils"
+import { cn, formatAddedTime } from "@/lib/utils"
 import type { Track } from "@/lib/mock-data"
 
 interface TopBarProps {
@@ -49,17 +49,6 @@ export function TopBar({
   )
 
   const lastAdded = tracks.length > 0 ? tracks[0].added_at : null
-  const formatDate = (date: Date) => {
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-    if (hours < 1) return "Just now"
-    if (hours < 24) return `${hours}h ago`
-    if (days < 7) return `${days}d ago`
-    return date.toLocaleDateString()
-  }
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -75,7 +64,7 @@ export function TopBar({
         <div className="border-b border-border px-4 py-4 sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
             {/* Artwork Mosaic */}
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div className="grid h-32 w-32 grid-cols-2 gap-1 overflow-hidden rounded-lg bg-card">
                 {[...Array(4)].map((_, i) => (
                   <img
@@ -96,7 +85,7 @@ export function TopBar({
                 <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span>{tracks.length} tracks</span>
                   <span>{totalReactions} reactions</span>
-                  {lastAdded && <span>Last added {formatDate(lastAdded)}</span>}
+                  {lastAdded && <span>Last added {formatAddedTime(lastAdded)}</span>}
                   <span>{new Set(tracks.flatMap((t) => t.added_by.name)).size} contributors</span>
                 </div>
               </div>

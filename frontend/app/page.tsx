@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { MOCK_TRACKS, GENRES, type Track } from "@/lib/mock-data"
 import { TopBar } from "@/components/top-bar"
 import { TrackList } from "@/components/track-list"
@@ -22,31 +22,41 @@ export default function Home() {
   const [selectedTrackForDetails, setSelectedTrackForDetails] = useState<Track | null>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
 
-  // Filter and sort tracks
-  const filteredTracks = MOCK_TRACKS.filter((track) => {
-    const matchesSearch =
-      track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      track.artists.some((a) => a.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      track.album.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter and sort tracks (memoized for performance)
+  const filteredTracks = useMemo(() => {
+    return MOCK_TRACKS.filter((track) => {
+      const matchesSearch =
+        track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        track.artists.some((a) => a.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        track.album.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesGenre = selectedGenres.length === 0 || selectedGenres.some((g) => track.genres.includes(g))
+      const matchesGenre = selectedGenres.length === 0 || selectedGenres.some((g) => track.genres.includes(g))
 
-    return matchesSearch && matchesGenre
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case "oldest":
-        return a.added_at.getTime() - b.added_at.getTime()
-      case "most-reacted":
-        const aReactions = a.reactions.like + a.reactions.fire + a.reactions.heart
-        const bReactions = b.reactions.like + b.reactions.fire + b.reactions.heart
-        return bReactions - aReactions
-      case "a-z":
-        return a.title.localeCompare(b.title)
-      case "newest":
-      default:
-        return b.added_at.getTime() - a.added_at.getTime()
-    }
-  })
+      return matchesSearch && matchesGenre
+    }).sort((a, b) => {
+      switch (sortBy) {
+        case "oldest":
+          return a.added_at.getTime() - b.added_at.getTime()
+        case "most-reacted":
+          const aReactions = a.reactions.like + a.reactions.fire + a.reactions.heart
+          const bReactions = b.reactions.like + b.reactions.fire + b.reactions.heart
+          return bReactions - aReactions
+        case "a-z":
+          return a.title.localeCompare(b.title)
+        case "newest":
+        default:
+          return b.added_at.getTime() - a.added_at.getTime()
+      }
+    })
+  }, [searchQuery, selectedGenres, sortBy])
+
+  // Memoize total reactions calculation
+  const totalReactions = useMemo(() => {
+    return MOCK_TRACKS.reduce(
+      (sum, track) => sum + track.reactions.like + track.reactions.fire + track.reactions.heart,
+      0,
+    )
+  }, [])
 
   // Handle play/pause
   const handlePlayPause = () => {
@@ -92,7 +102,8 @@ export default function Home() {
   // Handle seek
   const handleSeek = (time: number) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = time
+      // Convert milliseconds to seconds for audio element
+      audioRef.current.currentTime = time / 1000
       setCurrentTime(time)
     }
   }
@@ -172,6 +183,7 @@ export default function Home() {
             playingTrackId={playingTrack?.id || null}
             onPlay={handlePlayTrack}
             onShowDetails={handleShowDetails}
+            onClearFilters={handleReset}
           />
         </div>
       </div>
@@ -188,6 +200,7 @@ export default function Home() {
           currentTime={currentTime}
           duration={duration}
           onSeek={handleSeek}
+          audioRef={audioRef}
         />
       )}
 

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { useToast } from "@/hooks/use-toast"
 import type { Track } from "@/lib/mock-data"
+import { formatDuration } from "@/lib/utils"
 
 interface TrackDetailsSheetProps {
   track: Track | null
@@ -25,10 +26,8 @@ export function TrackDetailsSheet({ track, isOpen, onClose }: TrackDetailsSheetP
     })
   }
 
-  const formatDuration = (ms: number) => {
-    const minutes = Math.floor(ms / 60000)
-    const seconds = ((ms % 60000) / 1000).toFixed(0)
-    return `${minutes}:${Number.parseInt(seconds) < 10 ? "0" : ""}${seconds}`
+  const handleOpenSpotify = () => {
+    window.open(track.spotify_url, "_blank")
   }
 
   return (
@@ -106,7 +105,7 @@ export function TrackDetailsSheet({ track, isOpen, onClose }: TrackDetailsSheetP
               <Copy className="h-4 w-4" />
               Copy Link
             </Button>
-            <Button variant="outline" className="flex-1 gap-2 bg-transparent">
+            <Button onClick={handleOpenSpotify} variant="outline" className="flex-1 gap-2 bg-transparent">
               <ExternalLink className="h-4 w-4" />
               Spotify
             </Button>
