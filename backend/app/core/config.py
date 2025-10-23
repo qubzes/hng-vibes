@@ -28,8 +28,8 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "hng_vibes"
     POSTGRES_PORT: int = 5432
 
-    DATABASE_URL: str | None = None
-    SYNC_DATABASE_URL: str | None = None
+    DATABASE_URL: str = ""
+    SYNC_DATABASE_URL: str = ""
 
     # Redis Settings
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def assemble_db_connection(cls, v: str | None, info) -> Any:
-        if isinstance(v, str):
+        if isinstance(v, str) and v:
             return v
         
         values = info.data
@@ -71,7 +71,7 @@ class Settings(BaseSettings):
     @field_validator("SYNC_DATABASE_URL", mode="before")
     @classmethod
     def assemble_sync_db_connection(cls, v: str | None, info) -> Any:
-        if isinstance(v, str):
+        if isinstance(v, str) and v:
             return v
         
         values = info.data

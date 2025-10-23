@@ -24,7 +24,6 @@ wheels/
 venv/
 env/
 ENV/
-hng-vibes/  # ← Add this explicitly since it already exists
 
 # Environment variables
 .env

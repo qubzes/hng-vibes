@@ -20,7 +20,7 @@ test:
 	@pytest
 
 run:
-	@echo "Running FairMeld backend..."
+	@echo "Running HNG Vibes backend..."
 	@docker compose up -d
 	@docker compose logs api -f
 
