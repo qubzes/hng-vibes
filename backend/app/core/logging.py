@@ -12,17 +12,23 @@ COLORS = {
 
 
 class ColorFormatter(logging.Formatter):
-    def __init__(self, fmt: str) -> None:
+    def __init__(self, fmt: str | None = None) -> None:
         super().__init__(fmt)
         self.max_length = max(len(name) for name in COLORS.keys() if name != "RESET")
+        self.base_fmt = fmt or "%(levelname)s: %(message)s"
 
     def format(self, record: logging.LogRecord) -> str:
+        # Calculate padding for this specific record
         color = COLORS.get(record.levelname, COLORS["RESET"])
         level_name = record.levelname
         padding = " " * (self.max_length - len(level_name))
-        record.levelname = f"{color}{level_name}{COLORS['RESET']}"
-        self._style._fmt = f"%(levelname)s:{padding} %(message)s"
-        return super().format(record)
+        
+        # Create a temporary copy of the record to avoid mutating shared state
+        colored_level = f"{color}{level_name}{COLORS['RESET']}"
+        formatted_msg = f"{colored_level}:{padding} {record.getMessage()}"
+        
+        # Build the log record manually without mutating formatter state
+        return formatted_msg
 
 
 def setup_logger() -> logging.Logger:

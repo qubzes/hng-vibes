@@ -33,20 +33,20 @@ target_metadata = Base.metadata
 def include_object(
     object: Any, name: str | None, type_: str, reflected: bool, compare_to: Any
 ) -> bool:
-    # Skip langchain embedding tables and related indexes
-    if (
-        type_ in ["table", "index"]
-        and name
-        and name
-        in {
-            "langchain_pg_embedding",
-            "langchain_pg_collection",
-            "ix_langchain_pg_embedding_id",
-            "ix_cmetadata_gin",
-        }
-    ):
-        return False
-    return True
+    """
+    Filter out specific tables and indexes from migrations.
+    Returns False for langchain-related tables and indexes.
+    """
+    # Define set of excluded tables/indexes
+    excluded_objects = {
+        "langchain_pg_embedding",
+        "langchain_pg_collection",
+        "ix_langchain_pg_embedding_id",
+        "ix_cmetadata_gin",
+    }
+    
+    # Skip if it's a table or index in the excluded set
+    return not (type_ in {"table", "index"} and name in excluded_objects)
 
 
 def run_migrations_offline() -> None:

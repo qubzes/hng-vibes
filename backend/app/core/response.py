@@ -36,18 +36,18 @@ class ResponseException(Exception):
 class CustomJSONEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles datetime objects and other special types."""
     
-    def default(self, obj):
-        if isinstance(obj, (datetime.datetime, datetime.date, datetime.time)):
-            return obj.isoformat()
-        if isinstance(obj, BaseModel):
-            return obj.model_dump()
-        if hasattr(obj, "model_dump"):
-            return obj.model_dump()
-        if hasattr(obj, "__dict__"):
+    def default(self, o):
+        if isinstance(o, (datetime.datetime, datetime.date, datetime.time)):
+            return o.isoformat()
+        if isinstance(o, BaseModel):
+            return o.model_dump()
+        if hasattr(o, "model_dump"):
+            return o.model_dump()
+        if hasattr(o, "__dict__"):
             return {
-                k: v for k, v in obj.__dict__.items() if not k.startswith("_")
+                k: v for k, v in o.__dict__.items() if not k.startswith("_")
             }
-        return super().default(obj)
+        return super().default(o)
 
 
 def _serialize(obj: Any) -> Any:
@@ -77,7 +77,10 @@ def _serialize(obj: Any) -> Any:
 
 
 def respond(
-    status_code: int = 200, message: str = None, error: str = None, data: Any = None
+    status_code: int = 200, 
+    message: str | None = None, 
+    error: str | None = None, 
+    data: Any = None
 ) -> JSONResponse:
     """
     Create a standardized JSON response with proper serialization.
@@ -86,7 +89,7 @@ def respond(
         status_code: HTTP status code (default: 200)
         message: Response message (used for success responses)
         error: Error message (used for error responses)
-        data: Optional data payload (will be properly serialized)
+        data: Optional data payload (will be properly serialized, None if not provided)
 
     Returns:
         JSONResponse with standardized format
