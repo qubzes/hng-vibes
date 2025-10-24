@@ -4,14 +4,16 @@ from typing import AsyncGenerator, Callable
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slack_bolt.adapter.socket_mode import SocketModeHandler
 from sqlalchemy import text
 
 from app.api import api_router
 from app.core.config import settings
 from app.core.database import engine
-from app.core.logging import logger
+from app.core.logging import logging
 from app.core.redis import redis_client
 from app.core.response import ResponseException, respond
+from app.slack_bot import app as slack_app
 
 
 @asynccontextmanager
@@ -20,32 +22,34 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
-        logger.info("Database connection established")
+        logging.info("Database connection established")
 
         redis_client.ping()
-        logger.info("Redis connection established")
+        logging.info("Redis connection established")
 
-        logger.info(f"{settings.APP_NAME} v{settings.APP_VERSION} started successfully")
+        logging.info(
+            f"{settings.APP_NAME} v{settings.APP_VERSION} started successfully"
+        )
         yield
 
     except Exception as e:
-        logger.error(f"Startup failed: {e}")
+        logging.error(f"Startup failed: {e}")
         raise
 
     finally:
         try:
             await engine.dispose()
-            logger.info("Database connection closed")
+            logging.info("Database connection closed")
         except Exception as e:
-            logger.error(f"Error closing database connection: {e}")
+            logging.error(f"Error closing database connection: {e}")
 
         try:
             redis_client.close()
-            logger.info("Redis connection closed")
+            logging.info("Redis connection closed")
         except Exception as e:
-            logger.error(f"Error closing Redis connection: {e}")
+            logging.error(f"Error closing Redis connection: {e}")
 
-        logger.info(f"{settings.APP_NAME} shutdown complete")
+        logging.info(f"{settings.APP_NAME} shutdown complete")
 
 
 app = FastAPI(
@@ -69,7 +73,7 @@ async def global_exception_handler(
     except ResponseException:
         raise
     except Exception as e:
-        logger.error(f"Unexpected error in {request.method} {request.url.path}: {e}")
+        logging.error(f"Unexpected error in {request.method} {request.url.path}: {e}")
         return respond(status_code=500, message="Internal server error", data=None)
 
 
@@ -103,3 +107,8 @@ async def health_check() -> dict[str, str]:
         "version": settings.APP_VERSION,
         "environment": settings.ENVIRONMENT,
     }
+
+
+handler = SocketModeHandler(slack_app, settings.SLACK_APP_TOKEN)
+handler.connect()
+logging.info("Slack Bolt Agent is running...")

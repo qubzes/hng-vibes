@@ -1,4 +1,4 @@
-import logging
+import logging as logging_module
 
 from app.core.config import settings
 
@@ -11,13 +11,13 @@ COLORS = {
 }
 
 
-class ColorFormatter(logging.Formatter):
+class ColorFormatter(logging_module.Formatter):
     def __init__(self, fmt: str | None = None) -> None:
         super().__init__(fmt)
         self.max_length = max(len(name) for name in COLORS.keys() if name != "RESET")
         self.base_fmt = fmt or "%(levelname)s: %(message)s"
 
-    def format(self, record: logging.LogRecord) -> str:
+    def format(self, record: logging_module.LogRecord) -> str:
         # Calculate padding for this specific record
         color = COLORS.get(record.levelname, COLORS["RESET"])
         level_name = record.levelname
@@ -31,14 +31,14 @@ class ColorFormatter(logging.Formatter):
         return formatted_msg
 
 
-def setup_logger() -> logging.Logger:
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG if settings.DEBUG else logging.INFO)
+def setup_logger() -> logging_module.Logger:
+    logger = logging_module.getLogger(__name__)
+    logger.setLevel(logging_module.DEBUG if settings.DEBUG else logging_module.INFO)
 
-    handler = logging.StreamHandler()
+    handler = logging_module.StreamHandler()
     handler.setFormatter(ColorFormatter("%(levelname)s: %(message)s"))
     logger.addHandler(handler)
     return logger
 
 
-logger = setup_logger()
+logging = setup_logger()

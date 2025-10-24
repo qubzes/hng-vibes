@@ -2,7 +2,55 @@ from typing import Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.track import (
+    AddedByBase,
+    AddedByCreate,
+    AddedByResponse,
+    GenreBase,
+    GenreCreate,
+    GenreResponse,
+    MoodBase,
+    MoodCreate,
+    MoodResponse,
+    ReactionsBase,
+    ReactionsCreate,
+    ReactionsResponse,
+    ReactionsUpdate,
+    TrackBase,
+    TrackCreate,
+    TrackListResponse,
+    TrackResponse,
+    TrackUpdate,
+)
+
 T = TypeVar("T")
+
+__all__ = [
+    # Base classes
+    "BaseRequest",
+    "BaseResponse",
+    "PaginatedRequest",
+    "PaginatedResponse",
+    # Track schemas
+    "AddedByBase",
+    "AddedByCreate",
+    "AddedByResponse",
+    "GenreBase",
+    "GenreCreate",
+    "GenreResponse",
+    "MoodBase",
+    "MoodCreate",
+    "MoodResponse",
+    "ReactionsBase",
+    "ReactionsCreate",
+    "ReactionsResponse",
+    "ReactionsUpdate",
+    "TrackBase",
+    "TrackCreate",
+    "TrackListResponse",
+    "TrackResponse",
+    "TrackUpdate",
+]
 
 
 class BaseRequest(BaseModel):

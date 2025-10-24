@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     # Slack Settings
     SLACK_BOT_TOKEN: str = ""
     SLACK_SIGNING_SECRET: str = ""
+    SLACK_APP_TOKEN: str = ""
     SLACK_MUSIC_CHANNEL_ID: str = ""
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
