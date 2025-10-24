@@ -7,7 +7,7 @@ This module provides clean, sharp-named functions for:
 
 import datetime
 import json
-from typing import Any, Generic, TypeVar, Optional
+from typing import Any, Generic, Optional, TypeVar
 
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -35,7 +35,7 @@ class ResponseException(Exception):
 
 class CustomJSONEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles datetime objects and other special types."""
-    
+
     def default(self, o):
         if isinstance(o, (datetime.datetime, datetime.date, datetime.time)):
             return o.isoformat()
@@ -44,9 +44,7 @@ class CustomJSONEncoder(json.JSONEncoder):
         if hasattr(o, "model_dump"):
             return o.model_dump()
         if hasattr(o, "__dict__"):
-            return {
-                k: v for k, v in o.__dict__.items() if not k.startswith("_")
-            }
+            return {k: v for k, v in o.__dict__.items() if not k.startswith("_")}
         return super().default(o)
 
 
@@ -77,10 +75,10 @@ def _serialize(obj: Any) -> Any:
 
 
 def respond(
-    status_code: int = 200, 
-    message: str | None = None, 
-    error: str | None = None, 
-    data: Any = None
+    status_code: int = 200,
+    message: str | None = None,
+    error: str | None = None,
+    data: Any = None,
 ) -> JSONResponse:
     """
     Create a standardized JSON response with proper serialization.
@@ -95,23 +93,23 @@ def respond(
         JSONResponse with standardized format
     """
     serialized_data = _serialize(data) if data is not None else {}
-    
-    response_message = error if error is not None else (message if message is not None else "Success")
-    
+
+    response_message = (
+        error if error is not None else (message if message is not None else "Success")
+    )
+
     response_data = {
         "error" if error is not None else "message": response_message,
         "data": serialized_data,
     }
-    
+
     # Use custom JSON encoder to handle datetime objects
     content = json.loads(json.dumps(response_data, cls=CustomJSONEncoder))
-    
+
     return JSONResponse(status_code=status_code, content=content)
 
 
-def throw(
-    status_code: int, error: str
-) -> None:
+def throw(status_code: int, error: str) -> None:
     """
     Throw an exception that immediately stops execution.
 

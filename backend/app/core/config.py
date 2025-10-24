@@ -57,23 +57,25 @@ class Settings(BaseSettings):
     def assemble_db_connection(cls, v: str | None, info) -> Any:
         if isinstance(v, str) and v:
             return v
-        
+
         values = info.data
-        return str(PostgresDsn.build(
-            scheme="postgresql+asyncpg",
-            username=values.get("POSTGRES_USER"),
-            password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_SERVER"),
-            port=values.get("POSTGRES_PORT"),
-            path=f"{values.get('POSTGRES_DB') or ''}",
-        ))
+        return str(
+            PostgresDsn.build(
+                scheme="postgresql+asyncpg",
+                username=values.get("POSTGRES_USER"),
+                password=values.get("POSTGRES_PASSWORD"),
+                host=values.get("POSTGRES_SERVER"),
+                port=values.get("POSTGRES_PORT"),
+                path=f"{values.get('POSTGRES_DB') or ''}",
+            )
+        )
 
     @field_validator("SYNC_DATABASE_URL", mode="before")
     @classmethod
     def assemble_sync_db_connection(cls, v: str | None, info) -> Any:
         if isinstance(v, str) and v:
             return v
-        
+
         values = info.data
         return (
             f"postgresql://{values.get('POSTGRES_USER')}:{values.get('POSTGRES_PASSWORD')}"

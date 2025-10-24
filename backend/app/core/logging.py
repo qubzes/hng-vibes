@@ -22,11 +22,11 @@ class ColorFormatter(logging.Formatter):
         color = COLORS.get(record.levelname, COLORS["RESET"])
         level_name = record.levelname
         padding = " " * (self.max_length - len(level_name))
-        
+
         # Create a temporary copy of the record to avoid mutating shared state
         colored_level = f"{color}{level_name}{COLORS['RESET']}"
         formatted_msg = f"{colored_level}:{padding} {record.getMessage()}"
-        
+
         # Build the log record manually without mutating formatter state
         return formatted_msg
 

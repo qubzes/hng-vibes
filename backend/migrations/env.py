@@ -44,7 +44,7 @@ def include_object(
         "ix_langchain_pg_embedding_id",
         "ix_cmetadata_gin",
     }
-    
+
     # Skip if it's a table or index in the excluded set
     return not (type_ in {"table", "index"} and name in excluded_objects)
 
